@@ -1,27 +1,15 @@
-
 import "./SignUtils/CSS/Sign.css";
 import "./SignUtils/CSS/CandidateRegister.css";
-import "./SignUtils/CSS/style.css.map"
+import "./SignUtils/CSS/style.css.map";
 import { ToastContainer, toast } from 'react-toastify';
 import { useState } from "react";
-import axios from "axios"
+import axios from "axios";
 import { BASE_URL } from "../../helper";
 import { useNavigate } from 'react-router-dom';
 
-
 const CandidateRegister = () => {
     const [loading, setLoading] = useState(false);
-
     const navigate = useNavigate();
-    const CreationSuccess = () => toast.success("Candidate Created Successfully \n Click Anywhere to exit this screen", {
-        // position: toast.POSITION.TOP_CENTER,
-        className: "toast-message",
-    });
-    const CreationFailed = () => toast.error("Invalid Details \n Please Try Again!",{
-        // position: toast.POSITION.TOP_CENTER,
-        className: "toast-message",
-    });
-
 
     const [formData, setFormData] = useState({
         fullName: '',
@@ -34,29 +22,28 @@ const CandidateRegister = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({
-            ...formData,
+        setFormData(prev => ({
+            ...prev,
             [name]: value
-        });
+        }));
     };
 
     const handleFileChange = (e) => {
         const { name, files } = e.target;
-        setFormData({
-            ...formData,
+        setFormData(prev => ({
+            ...prev,
             [name]: files[0]
-        });
+        }));
     };
 
     const handleSubmit = async (e) => {
-        setLoading(true);
         e.preventDefault();
+        setLoading(true);
 
         const formDataToSend = new FormData();
         for (const key in formData) {
             formDataToSend.append(key, formData[key]);
         }
-        // console.log(formData);
 
         try {
             const response = await axios.post(`${BASE_URL}/createCandidate`, formDataToSend, {
@@ -64,28 +51,31 @@ const CandidateRegister = () => {
                     'Content-Type': 'multipart/form-data'
                 }
             });
+
             if (response.data.success) {
-                CreationSuccess();
+                toast.success("Candidate Created Successfully!", {
+                    className: "toast-message",
+                });
                 setTimeout(() => {
-                     navigate('/Candidate');
-                }, 200)
+                    navigate('/Candidate');
+                }, 2000);
+            } else {
+                toast.error("Invalid Details. Please try again!", {
+                    className: "toast-message",
+                });
             }
-            else {
-                CreationFailed()
-            }
-        }
-        catch (error) {
-            CreationFailed();
-            console.error(error);
-        }
-        finally {
+        } catch (error) {
+            console.error("Error creating candidate:", error);
+            toast.error("Something went wrong. Please try again!", {
+                className: "toast-message",
+            });
+        } finally {
             setLoading(false);
-          }
+        }
     };
 
-
     return (
-        <div >
+        <div>
             <section className="Candidatesignup">
                 <div className="FormTitle">
                     <h2>New Candidate</h2>
@@ -94,47 +84,90 @@ const CandidateRegister = () => {
                 <div className="container">
                     <div className="signup-content">
                         <div className="signup-form">
-                        <ToastContainer />
-
-                            <form method="POST" enctype="multipart/form-data" className="register-form" id="register-form">
+                            <ToastContainer />
+                            <form onSubmit={handleSubmit} encType="multipart/form-data" className="register-form" id="register-form">
                                 <div className="form-group">
-                                    <label for="fullName"><i className="zmdi zmdi-account material-icons-name"></i></label>
-                                    <input type="text" name="fullName" id="fullName" value={formData.fullName} onChange={handleChange} placeholder="Candidate Name" />
-                                </div>
-                                
-                                <div className="form-group">
-                                    <label for="age"><i className="zmdi zmdi-account material-icons-name"></i></label>
-                                    <input type="text" name="age" id="age" value={formData.age} onChange={handleChange} placeholder="Candidate Age" />
-                                </div>
-                                <div className="form-group">
-                                    <label for="party"><i className="zmdi zmdi-account material-icons-name"></i></label>
-                                    <input type="text" name="party" id="party" value={formData.party} onChange={handleChange} placeholder="Party Name" />
+                                    <label htmlFor="fullName"><i className="zmdi zmdi-account material-icons-name"></i></label>
+                                    <input
+                                        type="text"
+                                        name="fullName"
+                                        id="fullName"
+                                        value={formData.fullName}
+                                        onChange={handleChange}
+                                        placeholder="Candidate Name"
+                                        required
+                                    />
                                 </div>
                                 <div className="form-group">
-                                    <label for="bio"><i className="zmdi zmdi-account material-icons-name"></i></label>
-                                    <input type="text" name="bio" id="bio" value={formData.bio} onChange={handleChange} placeholder="Candidate Bio" />
+                                    <label htmlFor="age"><i className="zmdi zmdi-calendar"></i></label>
+                                    <input
+                                        type="number"
+                                        name="age"
+                                        id="age"
+                                        value={formData.age}
+                                        onChange={handleChange}
+                                        placeholder="Candidate Age"
+                                        required
+                                    />
                                 </div>
-
                                 <div className="form-group">
-                                    <label for="image"><i className="zmdi zmdi-account material-icons-name"></i></label>
-                                    <input type="file" name="image" id="image" onChange={handleFileChange} placeholder="Candidate's Photo" />
+                                    <label htmlFor="party"><i className="zmdi zmdi-flag"></i></label>
+                                    <input
+                                        type="text"
+                                        name="party"
+                                        id="party"
+                                        value={formData.party}
+                                        onChange={handleChange}
+                                        placeholder="Party Name"
+                                        required
+                                    />
                                 </div>
                                 <div className="form-group">
-                                    <label for="symbol"><i className="zmdi zmdi-account material-icons-name"></i></label>
-                                    <input type="file" name="symbol" id="symbol" onChange={handleFileChange} placeholder="Candidate Party Symbol" />
+                                    <label htmlFor="bio"><i className="zmdi zmdi-comment"></i></label>
+                                    <input
+                                        type="text"
+                                        name="bio"
+                                        id="bio"
+                                        value={formData.bio}
+                                        onChange={handleChange}
+                                        placeholder="Candidate Bio"
+                                        required
+                                    />
                                 </div>
-
+                                <div className="form-group">
+                                    <label htmlFor="image"><i className="zmdi zmdi-camera"></i></label>
+                                    <input
+                                        type="file"
+                                        name="image"
+                                        id="image"
+                                        onChange={handleFileChange}
+                                        accept="image/*"
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="symbol"><i className="zmdi zmdi-label"></i></label>
+                                    <input
+                                        type="file"
+                                        name="symbol"
+                                        id="symbol"
+                                        onChange={handleFileChange}
+                                        accept="image/*"
+                                        required
+                                    />
+                                </div>
                                 <div className="form-group form-button">
-                                    {/* <input type="submit" name="signup" id="signup" className="form-submit" value="Create Candidate" /> */}
-                                    <button onClick={handleSubmit} disabled={loading} className="form-submit">{loading ? <div className="spinner"></div> : 'Create Candidate'}</button>
+                                    <button type="submit" disabled={loading} className="form-submit">
+                                        {loading ? <div className="spinner"></div> : 'Create Candidate'}
+                                    </button>
                                 </div>
                             </form>
                         </div>
                     </div>
                 </div>
             </section>
-
         </div>
-    )
-}
+    );
+};
+
 export default CandidateRegister;
